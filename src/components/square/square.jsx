@@ -7,7 +7,7 @@ export default class Square extends React.Component {
 
     return (
       <button style={{background: this.props.color}} id={this.props.Sid} className="square" onClick={this.props.newonClick}>
-        <div id={this.props.Nid} className="num">{this.props.value}</div>
+        <div id={this.props.Nid} className="num" dangerouslySetInnerHTML={{ __html: this.props.value}}></div>
       </button >
     );
   }

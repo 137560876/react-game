@@ -1,21 +1,21 @@
 import React from 'react';
 import Board from '../../components/board/board';
 import Square from '../../components/square/square';
-import { Card } from 'antd';
-import {
-  ArrowRightOutlined
-} from '@ant-design/icons';
-
+import { Card, Statistic, Button, Modal, Divider } from 'antd';
+import { RedoOutlined } from '@ant-design/icons';
 import './main.less';
 
 export default class Main extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      squares: Array(36).fill(null),
-      color: Array(36).fill(null),
-      preColor: [],
-      preCss: [],
+      squares: Array(36).fill(null), //每个格子的剩余生命
+      color: Array(36).fill(null), //每个格子的颜色数组
+      preColor: [], //预读的颜色代码
+      preCss: [], //预读的颜色样式
+      score: 0, //计分变量
+      num: 0, //场上的所有方块数量
+      visible: false, //控制对话框显示或者隐藏
     };
   }
 
@@ -25,6 +25,7 @@ export default class Main extends React.Component {
    * @return: null
    */
   onClick(i, e) {
+    let nowNum = this.state.num + 1;
     //点击先判断该格子是否激活
     if (this.state.squares[i] === null) {
       //let list = this.state.squares;
@@ -80,17 +81,23 @@ export default class Main extends React.Component {
         default:
           break;
       }
-      list[i] = 5;
+      list[i] = 7;
 
       //判定是否能消除
       let bingoList = this.bingo(list, colorList, i, colorList[i]);
+      nowNum = nowNum - bingoList.length;
+
       this.deleteView(bingoList);
       list = this.deleteList(bingoList, list);
       colorList = this.deleteList(bingoList, colorList);
       this.setState({
+        num: nowNum,
         squares: list,
         color: colorList,
       })
+      if (nowNum === 36) {
+        this.showModal();
+      }
     } else {
 
     }
@@ -180,8 +187,23 @@ export default class Main extends React.Component {
         finalList = finalRList;
       }
     }
+    this.add(finalList.length);
     return finalList;
   }
+
+  /**
+   * @description: 根据消除数量统计得分
+   * @param {一次消除的行数} 
+   * @return: null
+   */
+  add(num) {
+    let newScore = this.state.score;
+    newScore = newScore + (num - 2) * 10 * num;
+    this.setState({
+      score: newScore,
+    })
+  }
+
 
   /**
    * @description: 每个新回合触发的事件
@@ -214,8 +236,131 @@ export default class Main extends React.Component {
     return newList;
   }
 
+  /** 对话框相关方法 */
+  showModal = () => {
+    this.setState({
+      visible: true,
+    });
+  };
 
-  componentWillMount() {
+  handleOk = e => {
+    this.setState({
+      visible: false,
+    });
+  };
+
+  handleCancel = e => {
+    this.re();
+    this.setState({
+      visible: false,
+    });
+  };
+
+  handleClick = e => {
+    this.re();
+  }
+
+  changePre = e => {
+    this.setState({
+      preColor: [],
+      preCss: [],
+    }, () => {
+      let newCss = [];
+      let newColor = [];
+      for (let index = 0; index < 3; index++) {
+        var num = Math.floor(Math.random() * 5 + 1);
+        switch (num) {
+          case 1:
+            newCss.unshift("#ee3f4d");
+            newColor.unshift(num);
+            break;
+          case 2:
+            newCss.unshift("#2e317c");
+            newColor.unshift(num);
+            break;
+          case 3:
+            newCss.unshift("#5cb3cc");
+            newColor.unshift(num);
+            break;
+          case 4:
+            newCss.unshift("#5dbe8a");
+            newColor.unshift(num);
+            break;
+          case 5:
+            newCss.unshift("#f8df72");
+            newColor.unshift(num);
+            break;
+          default:
+            break;
+        }
+      }
+      this.setState({
+        preColor: newColor,
+        preCss: newCss,
+      })
+    })
+    this.forceUpdate();
+  }
+
+  /**
+   * @description: 游戏重来
+   * @param {type} 
+   * @return: 
+   */
+  re() {
+    //先重置所有的状态参数
+    this.setState({
+      squares: Array(36).fill(null),
+      color: Array(36).fill(null),
+      preColor: [],
+      preCss: [],
+      score: 0,
+      num: 0,
+      visible: false,
+    }, () => {
+      let newCss = [];
+      let newColor = [];
+      for (let index = 0; index < 3; index++) {
+        var num = Math.floor(Math.random() * 5 + 1);
+        switch (num) {
+          case 1:
+            newCss.unshift("#ee3f4d");
+            newColor.unshift(num);
+            break;
+          case 2:
+            newCss.unshift("#2e317c");
+            newColor.unshift(num);
+            break;
+          case 3:
+            newCss.unshift("#5cb3cc");
+            newColor.unshift(num);
+            break;
+          case 4:
+            newCss.unshift("#5dbe8a");
+            newColor.unshift(num);
+            break;
+          case 5:
+            newCss.unshift("#f8df72");
+            newColor.unshift(num);
+            break;
+          default:
+            break;
+        }
+      }
+      this.setState({
+        preColor: newColor,
+        preCss: newCss,
+      })
+    })
+    //修改所有的色块
+    for (let i = 0; i < 36; i++) {
+      document.getElementById("s" + i).style.background = "#fff";
+      document.getElementById("n" + i).style.display = "inline";
+    }
+    this.forceUpdate();
+  }
+
+  UNSAFE_componentWillMount() {
     for (let index = 0; index < 3; index++) {
       var num = Math.floor(Math.random() * 5 + 1);
       switch (num) {
@@ -248,35 +393,76 @@ export default class Main extends React.Component {
   render() {
 
     return (
-      <div className="game">
-        <div className="game-board">
-          <Board
-            squares={this.state.squares}
-            newonClick={(i, e) => this.onClick(i, e)}
-          />
-        </div>
-        <div className="game-info">
-          <Card title="方块准备区域" style={{ width: 320, marginLeft: 80 }}>
-            <Square
-              Sid="preS2"
-              Nid="preN2"
-              color={this.state.preCss[0]}
-            />
-          <Square
-            Sid="preS2"
-            Nid="preN2"
-            color={this.state.preCss[1]}
-          />
-          <Square
-            Sid="preS3"
-            Nid="preN3"
-            color={this.state.preCss[2]}
-          />
-          <ArrowRightOutlined style={{ marginLeft: 15, fontSize: '60px' }} />
-          </Card>
+      <div className="bg">
+        <div className="game">
 
+          <div className="game-board">
+            <Board
+              squares={this.state.squares}
+              newonClick={(i, e) => this.onClick(i, e)}
+            />
+          </div>
+
+          <div className="game-info">
+            <Card bordered={false} style={{ width: 300, backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
+              <div className="game-mark">
+                <Statistic style={{ marginLeft: 0, marginRight: "auto" }} valueStyle={{ color: '#20a162' }} title={<div className="box1">重置次数</div>} value={5} precision={0} />
+                <Statistic style={{ marginLeft: "auto", marginRight: 0 }} valueStyle={{ color: '#2f90b9' }} title={<div className="box2">得分统计</div>} value={this.state.score} precision={0} />
+              </div>
+              <Divider />
+              <div className="pre-frame">
+                <Square
+                  Sid="preS2"
+                  Nid="preN2"
+                  color={this.state.preCss[0]}
+                />
+                <Square
+                  Sid="preS2"
+                  Nid="preN2"
+                  color={this.state.preCss[1]}
+                />
+                <Square
+                  Sid="preS3"
+                  Nid="preN3"
+                  color={this.state.preCss[2]}
+                />
+                <div className="out"></div>
+
+              </div>
+            </Card>
+            <div className="button-frame">
+              <div className="re">
+                <Button type="primary" shape="circle" icon={<RedoOutlined />} onClick={this.changePre} size="large" />
+              </div>
+              <div className="run">
+                <div>
+                  <Button shape="round" style={{ marginTop: 16 }} onClick={this.showModal} type="primary" size="large" ghost>
+                    查看排名
+                </Button>
+                </div>
+                <div>
+                  <Button shape="round" style={{ marginTop: 16 }} type="danger" size="large" ghost>
+                    规则介绍
+                </Button>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </div >
+
+        <Modal
+          title="游戏结束"
+          visible={this.state.visible}
+          onOk={this.handleOk}
+          onCancel={this.handleCancel}
+          okText="确认"
+          cancelText="重来"
+        >
+          <p>游戏结束,最终得分为{this.state.score}</p>
+        </Modal>
       </div>
-      </div >
     );
   }
 }
