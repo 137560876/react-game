@@ -1,9 +1,28 @@
 import React from 'react';
 import Board from '../../components/board/board';
 import Square from '../../components/square/square';
-import { Card, Statistic, Button, Modal, Divider, message } from 'antd';
-import { RedoOutlined } from '@ant-design/icons';
+import { Card, Statistic, Button, Modal, Divider, message, Table, Input } from 'antd';
+import { RedoOutlined, UserOutlined } from '@ant-design/icons';
+import { reqGetRank, reqAddRank } from "../../api/link";
 import './main.less';
+
+const columns = [
+  {
+    title: 'ID',
+    dataIndex: 'id',
+    key: 'id',
+  },
+  {
+    title: '昵称',
+    dataIndex: 'name',
+    key: 'name',
+  },
+  {
+    title: '分数',
+    dataIndex: 'score',
+    key: 'score',
+  },
+];
 
 export default class Main extends React.Component {
   constructor(props) {
@@ -18,7 +37,10 @@ export default class Main extends React.Component {
       visible: false, //控制对话框显示或者隐藏
       ruleVisible: false, //规则介绍页面显示隐藏
       reNum: 3, //重置机会
-      pRuleVisible: false //手机端规则介绍页面
+      pRuleVisible: false, //手机端规则介绍页面
+      rankVisible: false, //排行榜页面显示隐藏
+      rankList: [], //存放排行榜数据
+      userName: "", //存储用户昵称
     };
   }
 
@@ -267,6 +289,54 @@ export default class Main extends React.Component {
     });
   };
 
+  async getRankList() {
+    const response = await reqGetRank();
+    let rank = [];
+    for (let i = 0; i < response.list.length; i++) {
+      rank.push({
+        key: response.list[i].id,
+        id: response.list[i].id,
+        name: response.list[i].name,
+        score: response.list[i].score,
+      })
+    }
+    this.setState({
+      rankList: rank,
+    })
+
+  }
+
+  async addRank(name, score) {
+    const response = await reqAddRank(name, score);
+    if (response.code === 200) {
+      message.success('成绩上传成功');
+    } else {
+      message.error('成绩上传失败');
+    }
+  }
+  /**排行榜页面打开关闭 */
+
+  /** 对话框相关方法 */
+  showRankModal = () => {
+    this.getRankList();
+    this.setState({
+      rankVisible: true,
+    });
+  };
+
+  rankOk = e => {
+    this.setState({
+      rankVisible: false,
+    });
+  };
+
+  rankCancel = e => {
+    this.re();
+    this.setState({
+      rankVisible: false,
+    });
+  };
+
   /**规则介绍页面控制机制 */
   /** 对话框相关方法 */
   showRuleModal = () => {
@@ -422,6 +492,24 @@ export default class Main extends React.Component {
     this.forceUpdate();
   }
 
+  up = () => {
+    console.log(this.state.userName, this.state.score);
+    if (this.state.userName === null || this.state.userName.length === 0) {
+      this.addRank("无名大侠", this.state.score);
+    } else {
+      this.addRank(this.state.userName, this.state.score);
+    }
+  }
+
+  onchange = e => {
+    if(e && e.target && e.target.value){
+      let value = e.target.value;
+      this.setState({
+        userName: value
+      })
+    }
+  }
+
   rank = e => {
     message.warning('排行榜还没做好，v1.4上线');
   }
@@ -464,7 +552,7 @@ export default class Main extends React.Component {
           <div className="p-frame">
             <div className="p-line">
               <div className="p-re">重置次数: {this.state.reNum}</div>
-              <Button shape="round" style={{ marginTop: 5, marginLeft: "auto", marginRight: 5 }} onClick={this.showPRuleModal} type="primary"  ghost>
+              <Button shape="round" style={{ marginTop: 5, marginLeft: "auto", marginRight: 5 }} onClick={this.showPRuleModal} type="primary" ghost>
                 规则
               </Button>
             </div>
@@ -495,7 +583,7 @@ export default class Main extends React.Component {
               squares={this.state.squares}
               newonClick={(i, e) => this.onClick(i, e)}
             />
-            <div className="xq">v1.3.5    @青小渊</div>
+            <div className="xq">v1.4    @青小渊</div>
           </div>
           <div className="game-info">
             <Card bordered={false} style={{ width: 300, backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
@@ -530,7 +618,7 @@ export default class Main extends React.Component {
               </div>
               <div className="run">
                 <div>
-                  <Button shape="round" style={{ marginTop: 16 }} onClick={this.rank} type="primary" size="large" ghost>
+                  <Button shape="round" style={{ marginTop: 16 }} onClick={this.showRankModal} type="primary" size="large" ghost>
                     查看排名
                 </Button>
                 </div>
@@ -546,7 +634,7 @@ export default class Main extends React.Component {
           </div>
         </div >
         <div className="p-button">
-          <Button shape="round" style={{ marginTop: 16, marginLeft: 37, marginRight: "auto" }} onClick={this.rank} type="primary" size="large" ghost>
+          <Button shape="round" style={{ marginTop: 16, marginLeft: 37, marginRight: "auto" }} onClick={this.showRankModal} type="primary" size="large" ghost>
             查看排名
           </Button>
           <Button shape="round" style={{ marginTop: 16, marginLeft: "auto", marginRight: 37 }} onClick={this.changePre} type="danger" size="large" ghost>
@@ -561,7 +649,12 @@ export default class Main extends React.Component {
           okText="确认"
           cancelText="重来"
         >
-          <p>游戏结束,最终得分为{this.state.score}</p>
+          <div className="end-div">游戏结束,最终得分为 {this.state.score}</div>
+          <div className="end-div">在下方输入昵称可以上传本局得分↓↓↓</div>
+          <Input maxLength='8' onChange={ this.onchange } size="large" placeholder="请输入昵称,最长8个字" prefix={<UserOutlined />} />
+          <Button block style={{ marginTop: 10 }} onClick={this.up} type="primary" ghost>
+            上传
+          </Button>
         </Modal>
         {/* 规则介绍对话框 */}
         <Modal
@@ -587,6 +680,17 @@ export default class Main extends React.Component {
         >
           <div className="p-rule-1"></div>
           <div className="p-rule-2"></div>
+        </Modal>
+        <Modal
+          title="排行榜"
+          visible={this.state.rankVisible}
+          onOk={this.rankOk}
+          onCancel={this.rankCancel}
+          okText="我知道了"
+          cancelText="取消"
+          width='800px'
+        >
+          <Table columns={columns} dataSource={this.state.rankList} pagination={false} />
         </Modal>
       </div>
     );
