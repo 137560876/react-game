@@ -98,3 +98,94 @@ ul {
   background: url(../../img/rule.png) no-repeat;
   background-size: contain;
 }
+
+.p-game-info {
+  display: none;
+}
+
+.p-button {
+  display: none;
+}
+
+
+//手机端样式适配
+@media screen and (max-width: 600px) {
+  .game {
+    display: flex;
+    justify-content: center;
+    height: auto;
+  }
+
+  .game-info {
+    display: none;
+  }
+
+  .game-board {
+    margin-top: 2vh;
+  }
+
+  .p-game-info {
+    display: flex;
+    width: 100%;
+    height: 120px;
+  }
+
+  .p-line {
+    display: flex;
+  }
+
+  .p-re {
+    font-size: 22px;
+    font-family: Microsoft Yahei;
+    color: #20a162;
+    text-align: left;
+    margin-left: 10px;
+  }
+
+  .p-score {
+    font-size: 22px;
+    font-family: Microsoft Yahei;
+    color: #2f90b9;
+    text-align: left;
+    margin-left: 10px;
+  }
+
+  .p-pre {
+    width: 200px;
+    margin-left: auto;
+    margin-right: 5px;
+  }
+
+  .p-frame {
+    width: 100%;
+  }
+
+  .out {
+    width: 50px;
+    height: 50px;
+    margin-right: 0px;
+    margin-left: auto;
+    background: url(../../img/right.png) no-repeat;
+    background-size: contain;
+  }
+
+  .p-button {
+    width: 100%;
+    display: flex;
+  }
+
+  .p-rule-1 {
+    width: 250px;
+    height: 600px;
+    background: url(../../img/pRule1.png) no-repeat;
+    background-size: contain;
+  }
+
+  .p-rule-2 {
+    width: 250px;
+    height: 685px;
+    background: url(../../img/pRule2.png) no-repeat;
+    background-size: contain;
+  }
+
+}

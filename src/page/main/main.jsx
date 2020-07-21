@@ -18,6 +18,7 @@ export default class Main extends React.Component {
       visible: false, //控制对话框显示或者隐藏
       ruleVisible: false, //规则介绍页面显示隐藏
       reNum: 3, //重置机会
+      pRuleVisible: false //手机端规则介绍页面
     };
   }
 
@@ -286,6 +287,26 @@ export default class Main extends React.Component {
     });
   };
 
+  /**手机端规则介绍框控制方法 */
+  showPRuleModal = () => {
+    this.setState({
+      pRuleVisible: true,
+    });
+  };
+
+  pRuleOk = e => {
+    this.setState({
+      pRuleVisible: false,
+    });
+  };
+
+  pRuleCancel = e => {
+    this.setState({
+      pRuleVisible: false,
+    });
+  };
+
+
 
   handleClick = e => {
     this.re();
@@ -439,16 +460,43 @@ export default class Main extends React.Component {
 
     return (
       <div className="bg">
+        <div className="p-game-info">
+          <div className="p-frame">
+            <div className="p-line">
+              <div className="p-re">重置次数: {this.state.reNum}</div>
+              <Button shape="round" style={{ marginTop: 5, marginLeft: "auto", marginRight: 5 }} onClick={this.showPRuleModal} type="primary"  ghost>
+                规则
+              </Button>
+            </div>
+            <div className="p-score">得分: {this.state.score}</div>
+            <div className="p-pre">
+              <Square
+                Sid="preS2"
+                Nid="preN2"
+                color={this.state.preCss[0]}
+              />
+              <Square
+                Sid="preS2"
+                Nid="preN2"
+                color={this.state.preCss[1]}
+              />
+              <Square
+                Sid="preS3"
+                Nid="preN3"
+                color={this.state.preCss[2]}
+              />
+              <div className="out"></div>
+            </div>
+          </div>
+        </div>
         <div className="game">
-
           <div className="game-board">
             <Board
               squares={this.state.squares}
               newonClick={(i, e) => this.onClick(i, e)}
             />
-            <div className="xq">v1.3    @青小渊</div>
+            <div className="xq">v1.3.5    @青小渊</div>
           </div>
-
           <div className="game-info">
             <Card bordered={false} style={{ width: 300, backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
               <div className="game-mark">
@@ -497,7 +545,14 @@ export default class Main extends React.Component {
 
           </div>
         </div >
-
+        <div className="p-button">
+          <Button shape="round" style={{ marginTop: 16, marginLeft: 37, marginRight: "auto" }} onClick={this.rank} type="primary" size="large" ghost>
+            查看排名
+          </Button>
+          <Button shape="round" style={{ marginTop: 16, marginLeft: "auto", marginRight: 37 }} onClick={this.changePre} type="danger" size="large" ghost>
+            重置一下
+          </Button>
+        </div>
         <Modal
           title="游戏结束"
           visible={this.state.visible}
@@ -519,6 +574,19 @@ export default class Main extends React.Component {
           width="1250px"
         >
           <div className="rule"></div>
+        </Modal>
+        {/* 手机端规则对话框 */}
+        <Modal
+          title="游戏规则"
+          visible={this.state.pRuleVisible}
+          onOk={this.pRuleOk}
+          onCancel={this.pRuleCancel}
+          okText="我知道了"
+          cancelText="取消"
+          width="1250px"
+        >
+          <div className="p-rule-1"></div>
+          <div className="p-rule-2"></div>
         </Modal>
       </div>
     );
