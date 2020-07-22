@@ -6,11 +6,11 @@ import ajax from "./ajax";
 
 //getRank
 export const reqGetRank = () =>
-  ajax("/getRank", {}, "GET");
+  ajax("http://47.97.202.111:8085/getRank", {}, "GET");
 
 //addRank
 export const reqAddRank = (name, score) =>
-  ajax("/addRank", {
+  ajax("http://47.97.202.111:8085/addRank", {
     name,
     score
   }, "POST");
