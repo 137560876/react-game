@@ -130,7 +130,14 @@ export default class Main extends React.Component {
 
   deleteView(list) {
     for (let index = 0; index < list.length; index++) {
-      document.getElementById('s' + list[index]).style.background = "#fff";
+      //document.getElementById('s' + list[index]).style.background = "#fff";
+      let d = document.getElementById('s' + list[index]);
+      d.style.animation = "myfirst 1s ease-in 0s 1 alternate forwards";
+      d.addEventListener('animationend', function (e) {
+        d.style.background = "#fff"
+        d.style.animation = "";
+      })
+      document.getElementById('n' + list[index]).style.display = "inline";
       document.getElementById('n' + list[index]).innerText = "";
     }
   }
@@ -310,6 +317,9 @@ export default class Main extends React.Component {
     const response = await reqAddRank(name, score);
     if (response.code === 200) {
       message.success('成绩上传成功');
+      this.setState({
+        rankVisible: false,
+      })
     } else {
       message.error('成绩上传失败');
     }
@@ -502,7 +512,7 @@ export default class Main extends React.Component {
   }
 
   onchange = e => {
-    if(e && e.target && e.target.value){
+    if (e && e.target && e.target.value) {
       let value = e.target.value;
       this.setState({
         userName: value
@@ -583,7 +593,7 @@ export default class Main extends React.Component {
               squares={this.state.squares}
               newonClick={(i, e) => this.onClick(i, e)}
             />
-            <div className="xq">v1.4    @青小渊</div>
+            <div className="xq">v1.4.5    @青小渊</div>
           </div>
           <div className="game-info">
             <Card bordered={false} style={{ width: 300, backgroundColor: "rgba(255, 255, 255, 0.4)" }}>
@@ -651,7 +661,7 @@ export default class Main extends React.Component {
         >
           <div className="end-div">游戏结束,最终得分为 {this.state.score}</div>
           <div className="end-div">在下方输入昵称可以上传本局得分↓↓↓</div>
-          <Input maxLength='8' onChange={ this.onchange } size="large" placeholder="请输入昵称,最长8个字" prefix={<UserOutlined />} />
+          <Input maxLength='8' onChange={this.onchange} size="large" placeholder="请输入昵称,最长8个字" prefix={<UserOutlined />} />
           <Button block style={{ marginTop: 10 }} onClick={this.up} type="primary" ghost>
             上传
           </Button>
